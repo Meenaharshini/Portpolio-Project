@@ -19,16 +19,6 @@ SELECT Location, date, total_cases,population, ROUND((total_cases/population) * 
 FROM Portfolio..CovidDeaths$ 
 order by 1,2 
 
-
----Country is with the highest infection rate population
-
-SELECT Location,population, MAX(total_cases) AS HighestInfectionRate,
-MAX(total_cases/population) * 100 AS InfectionPopulationPercentage FROM
-Portfolio..CovidDeaths$ 
-WHERE location = 'India'
-GROUP BY location,population
-ORDER BY  InfectionPopulationPercentage DESC
-
 ---Highest Death count per population
 
 
@@ -55,16 +45,6 @@ FROM Portfolio..CovidDeaths$
 WHERE continent IS NOT NULL
 GROUP BY continent
 ORDER BY  HighestDeathRate DESC
-
----Global Numbers
-
-SELECT   Sum(new_cases) AS Total_Cases, SUM(CAST(new_deaths AS INT)) AS Total_Deaths, 
-SUM(CAST(new_deaths AS INT)) / SUM(new_cases) AS DeathPercentage
-FROM Portfolio..CovidDeaths$ 
-WHERE continent IS NOT NULL
---GROUP BY date
-order by 1,2 
-
 
 ---combine two tables
 
@@ -130,3 +110,44 @@ AND cd.location = cv.location
 WHERE cd.continent IS NOT NULL
 
 SELECT * FROM PercentOfPopulationVaccination
+
+
+---Used query for tableau project---
+
+---Global Numbers
+---1--
+SELECT   Sum(new_cases) AS Total_Cases, SUM(CAST(new_deaths AS INT)) AS Total_Deaths, 
+SUM(CAST(new_deaths AS INT)) / SUM(new_cases) AS DeathPercentage
+FROM Portfolio..CovidDeaths$ 
+WHERE continent IS NOT NULL
+--GROUP BY date
+order by 1,2 
+
+---Deathrate of European union
+---2---
+
+SELECT location, SUM(CAST(new_deaths AS INT)) AS TotalDeathCount
+FROM Portfolio..CovidDeaths$
+WHERE continent IS NOT NULL AND
+location not in  ('World','European Union', 'International')
+GROUP BY location
+ORDER BY TotalDeathCount DESC OFFSET 0 ROWS
+
+
+---Country is with the highest infection rate population
+---3---
+SELECT Location,population, MAX(total_cases) AS HighestInfectionRate,
+MAX(total_cases/population) * 100 AS InfectionPopulationPercentage FROM
+Portfolio..CovidDeaths$ 
+--WHERE location = 'India'
+GROUP BY location,population
+ORDER BY  location ASC,InfectionPopulationPercentage DESC
+
+---4--
+Select Location, Population,date, MAX(total_cases) as HighestInfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
+From Portfolio..CovidDeaths$
+WHERE location = 'Vatican'
+Group by Location, Population, date
+order by PercentPopulationInfected desc
+OFFSET 0 ROWS
+
